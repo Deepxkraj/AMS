@@ -71,8 +71,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
-    // Use window.location for logout - it's more reliable
-    window.location.href = '/login';
+    // Use replace to avoid history issues
+    window.location.replace('/login');
   };
 
   const value = {

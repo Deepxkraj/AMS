@@ -3,6 +3,10 @@
     {
       "source": "/api/(.*)",
       "destination": "https://ams-backend-86i6.onrender.com/api/$1"
+    },
+    {
+      "source": "/((?!api).*)",
+      "destination": "/index.html"
     }
   ]
 }
