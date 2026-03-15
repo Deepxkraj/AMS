@@ -24,7 +24,12 @@ router.post('/login', [
     const { email, password } = req.body;
 
     // Check if user exists
-    const user = await User.findOne({ email }).populate('department');
+    const user = await User.findOne({ email })
+      .populate({
+        path: 'department',
+        select: 'name',
+        strictPopulate: false
+      });
 
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -36,7 +41,7 @@ router.post('/login', [
     }
 
     // Check approval status (except for admin and citizen)
-    if (user.role === 'hod') {
+    if (user.role === 'department_head') {
       if (!user.adminApproved) {
         return res.status(403).json({
           message: 'Account pending approval',
@@ -79,13 +84,13 @@ router.post('/login', [
 });
 
 // @route   POST /api/auth/signup
-// @desc    Register new user (HOD, Technician, Citizen)
+// @desc    Register new user (Department Head, Technician, Citizen)
 // @access  Public
 router.post('/signup', upload.single('idProof'), [
   body('name').trim().notEmpty().withMessage('Name is required'),
   body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters'),
-  body('role').isIn(['hod', 'technician', 'citizen']).withMessage('Invalid role')
+  body('role').isIn(['department_head', 'technician', 'citizen']).withMessage('Invalid role')
 ], async (req, res) => {
   try {
     const errors = validationResult(req);
@@ -101,16 +106,16 @@ router.post('/signup', upload.single('idProof'), [
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    // For HOD and Technician, validate required fields
-    if ((role === 'hod' || role === 'technician') && !department) {
+    // For Department Head and Technician, validate required fields
+    if ((role === 'department_head' || role === 'technician') && !department) {
       return res.status(400).json({ message: 'Department is required' });
     }
 
-    if ((role === 'hod' || role === 'technician') && !phone) {
+    if ((role === 'department_head' || role === 'technician') && !phone) {
       return res.status(400).json({ message: 'Phone is required' });
     }
 
-    if ((role === 'hod' || role === 'technician') && !req.file) {
+    if ((role === 'department_head' || role === 'technician') && !req.file) {
       return res.status(400).json({ message: 'ID proof is required' });
     }
 
@@ -122,8 +127,8 @@ router.post('/signup', upload.single('idProof'), [
         return res.status(400).json({ message: 'Department not found' });
       }
 
-      // For HOD signup: prevent selecting a department that already has a HOD
-      if (role === 'hod' && dept.hod) {
+      // For Department Head signup: prevent selecting a department that already has a Department Head
+      if (role === 'department_head' && dept.hod) {
         return res.status(400).json({
           message: 'This department already has a Head of Department. Please contact admin.'
         });
@@ -133,8 +138,8 @@ router.post('/signup', upload.single('idProof'), [
     // Create user
     // Approval rules:
     // - citizen: no approval required
-    // - hod: admin approval required, hodApproved is implicitly true
-    // - technician: needs hod approval + admin approval
+    // - department_head: admin approval required, hodApproved is implicitly true
+    // - technician: both admin and hod approval required
     const userData = {
       name,
       email,
@@ -144,7 +149,7 @@ router.post('/signup', upload.single('idProof'), [
       hodApproved: role === 'technician' ? false : true
     };
 
-    if (role === 'hod' || role === 'technician') {
+    if (role === 'department_head' || role === 'technician') {
       userData.department = department;
       userData.phone = phone;
       userData.idProof = req.file ? `/uploads/id-proofs/${req.file.filename}` : null;
@@ -176,7 +181,11 @@ router.get('/me', protect, async (req, res) => {
   try {
     const user = await User.findById(req.user._id)
       .select('-password')
-      .populate('department');
+      .populate({
+        path: 'department',
+        select: 'name',
+        strictPopulate: false
+      });
     
     res.json(user);
   } catch (error) {

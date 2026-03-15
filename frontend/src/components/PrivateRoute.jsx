@@ -17,7 +17,9 @@ const PrivateRoute = ({ children, allowedRoles }) => {
   }
 
   if (!allowedRoles.includes(user.role)) {
-    return <Navigate to={`/${user.role}`} replace />;
+    // Map department_head to hod route for redirect
+    const redirectRoute = user.role === 'department_head' ? 'hod' : user.role;
+    return <Navigate to={`/${redirectRoute}`} replace />;
   }
 
   return children;

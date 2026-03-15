@@ -5,7 +5,6 @@ import {
   Users,
   Wrench,
   FileText,
-  Map,
   Settings,
   LogOut,
   Building2,
@@ -27,28 +26,27 @@ const Sidebar = () => {
       { path: '/admin/assets', label: 'Assets', icon: Building2 },
       { path: '/admin/complaints', label: 'Complaints', icon: AlertCircle },
       { path: '/admin/departments', label: 'Departments', icon: Settings },
-      { path: '/admin/map', label: 'Map View', icon: Map },
       { path: '/admin/users', label: 'Users', icon: Users },
     ],
-    hod: [
+    department_head: [
       { path: '/hod', label: 'Dashboard', icon: LayoutDashboard },
       { path: '/hod/approvals', label: 'Technician Approvals', icon: CheckCircle2 },
       { path: '/hod/assets', label: 'Assets', icon: Building2 },
+      { path: '/hod/maintenance', label: 'Maintenance', icon: Wrench },
+      { path: '/hod/completed-tasks', label: 'Completed Tasks', icon: CheckCircle2 },
       { path: '/hod/complaints', label: 'Complaints', icon: AlertCircle },
       { path: '/hod/technicians', label: 'Technicians', icon: Users },
-      { path: '/hod/map', label: 'Map View', icon: Map },
     ],
     technician: [
       { path: '/technician', label: 'Dashboard', icon: LayoutDashboard },
       { path: '/technician/assets', label: 'My Assets', icon: Building2 },
       { path: '/technician/complaints', label: 'My Complaints', icon: AlertCircle },
-      { path: '/technician/map', label: 'Map View', icon: Map },
+      { path: '/technician/completed-tasks', label: 'Completed Tasks', icon: CheckCircle2 },
     ],
     citizen: [
       { path: '/citizen', label: 'Dashboard', icon: LayoutDashboard },
       { path: '/citizen/complaints', label: 'My Complaints', icon: AlertCircle },
       { path: '/citizen/complaints/new', label: 'New Complaint', icon: FileText },
-      { path: '/citizen/map', label: 'Map View', icon: Map },
     ],
   };
 

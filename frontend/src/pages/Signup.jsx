@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
 import api from '../utils/api';
 import { Building2 } from 'lucide-react';
 
@@ -40,12 +39,12 @@ const Signup = () => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
+      alert('Passwords do not match');
       return;
     }
 
     if ((formData.role === 'hod' || formData.role === 'technician') && !idProof) {
-      toast.error('ID proof is required');
+      alert('ID proof is required');
       return;
     }
 
@@ -63,10 +62,10 @@ const Signup = () => {
     const result = await signup(data);
 
     if (result.success) {
-      toast.success('Registration successful! Please wait for approval.');
+      alert('Registration successful! Please wait for approval.');
       navigate('/login');
     } else {
-      toast.error(result.message);
+      alert(result.message);
     }
 
     setLoading(false);

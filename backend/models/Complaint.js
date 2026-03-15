@@ -49,6 +49,9 @@ const complaintSchema = new mongoose.Schema({
     enum: ['Submitted', 'Assigned', 'In Progress', 'Under Maintenance', 'Resolved'],
     default: 'Submitted'
   },
+  dueDate: {
+    type: Date
+  },
   assignedTo: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'

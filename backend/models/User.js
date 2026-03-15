@@ -21,26 +21,26 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['admin', 'hod', 'technician', 'citizen'],
+    enum: ['admin', 'department_head', 'technician', 'citizen'],
     required: true
   },
   department: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department',
     required: function() {
-      return this.role === 'hod' || this.role === 'technician';
+      return this.role === 'department_head' || this.role === 'technician';
     }
   },
   phone: {
     type: String,
     required: function() {
-      return this.role === 'hod' || this.role === 'technician';
+      return this.role === 'department_head' || this.role === 'technician';
     }
   },
   idProof: {
     type: String, // Path to uploaded file
     required: function() {
-      return this.role === 'hod' || this.role === 'technician';
+      return this.role === 'department_head' || this.role === 'technician';
     }
   },
   adminApproved: {
@@ -52,7 +52,7 @@ const userSchema = new mongoose.Schema({
   hodApproved: {
     type: Boolean,
     default: function() {
-      return this.role === 'admin' || this.role === 'citizen' || this.role === 'hod';
+      return this.role === 'admin' || this.role === 'citizen' || this.role === 'department_head';
     }
   },
   isActive: {

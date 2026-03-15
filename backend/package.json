@@ -10,8 +10,7 @@
     "seed:admin": "node scripts/seedAdmin.js",
     "seed:departments": "node scripts/seedDepartments.js",
     "seed:assets": "node scripts/seedAssets.js",
-    "seed:assets:extra": "node scripts/seedAssetsExtra.js",
-    "seed:all": "npm run seed:departments && npm run seed:admin && npm run seed:assets && npm run seed:assets:extra"
+    "seed:all": "npm run seed:departments && npm run seed:admin && npm run seed:assets"
   },
   "keywords": [],
   "author": "",

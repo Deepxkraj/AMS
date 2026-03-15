@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import toast from 'react-hot-toast';
 import { Building2 } from 'lucide-react';
 
 const Login = () => {
@@ -10,8 +9,14 @@ const Login = () => {
     password: ''
   });
   const [loading, setLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      navigate('/admin');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,10 +25,12 @@ const Login = () => {
     const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      toast.success('Login successful!');
-      navigate(`/${result.user.role}`);
+      alert('Login successful!');
+      // Map department_head role to hod route
+      const route = result.user.role === 'department_head' ? 'hod' : result.user.role;
+      navigate(`/${route}`);
     } else {
-      toast.error(result.message);
+      alert(result.message || 'Login failed');
     }
 
     setLoading(false);

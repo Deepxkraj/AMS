@@ -8,6 +8,7 @@ const Complaints = () => {
   const [items, setItems] = useState([]);
   const [technicians, setTechnicians] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [dueDates, setDueDates] = useState({});
 
   useEffect(() => {
     fetchAll();
@@ -28,7 +29,8 @@ const Complaints = () => {
 
   const assign = async (id, assignedTo) => {
     try {
-      await api.put(`/api/complaints/${id}/assign`, { assignedTo });
+      const dueDate = dueDates[id] || '';
+      await api.put(`/api/complaints/${id}/assign`, { assignedTo, dueDate: dueDate || undefined });
       toast.success('Assigned');
       fetchAll();
     } catch (e) {
@@ -51,7 +53,8 @@ const Complaints = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Asset</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Urgency</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assign</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Technician</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Task End Date</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -76,6 +79,19 @@ const Complaints = () => {
                         </option>
                       ))}
                     </select>
+                  </td>
+                  <td className="px-6 py-4 text-sm">
+                    <input
+                      type="date"
+                      value={dueDates[c._id] || (c.dueDate ? c.dueDate.slice(0, 10) : '')}
+                      onChange={(e) =>
+                        setDueDates((prev) => ({
+                          ...prev,
+                          [c._id]: e.target.value,
+                        }))
+                      }
+                      className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
                   </td>
                 </tr>
               ))}

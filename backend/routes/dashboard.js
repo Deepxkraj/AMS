@@ -18,13 +18,13 @@ router.get('/stats', protect, async (req, res) => {
       const totalAssets = await Asset.countDocuments();
       const totalComplaints = await Complaint.countDocuments();
       // Pending approval count should match approval-queue rules:
-      // - HOD pending: adminApproved=false
+      // - Department Head pending: adminApproved=false
       // - Technician pending: hodApproved=true AND adminApproved=false
       // Only count active users
       const pendingApprovals = await User.countDocuments({
         isActive: true,
         $or: [
-          { role: 'hod', adminApproved: false },
+          { role: 'department_head', adminApproved: false },
           { role: 'technician', hodApproved: true, adminApproved: false }
         ]
       });
@@ -46,7 +46,7 @@ router.get('/stats', protect, async (req, res) => {
         assetsByStatus,
         complaintsByStatus
       };
-    } else if (req.user.role === 'hod') {
+    } else if (req.user.role === 'department_head') {
       const departmentAssets = await Asset.countDocuments({ department: req.user.department });
       const departmentComplaints = await Complaint.countDocuments({ department: req.user.department });
       const pendingTechnicianApprovals = await User.countDocuments({
@@ -113,7 +113,7 @@ router.get('/map-data', protect, async (req, res) => {
     let assetQuery = {};
     let complaintQuery = {};
 
-    if (req.user.role === 'hod') {
+    if (req.user.role === 'department_head') {
       assetQuery.department = req.user.department;
       complaintQuery.department = req.user.department;
     } else if (req.user.role === 'technician') {

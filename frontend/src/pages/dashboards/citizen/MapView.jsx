@@ -1,27 +1,12 @@
-import { useEffect, useState } from 'react';
-import api from '../../../utils/api';
 import Card from '../../../components/ui/Card';
-import AssetMap from '../../../components/Map/AssetMap';
 
 const MapView = () => {
-  const [data, setData] = useState({ assets: [], complaints: [] });
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const res = await api.get('/api/dashboard/map-data');
-        setData(res.data);
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
   return (
-    <Card title="Public Asset Map" subtitle="View assets and your complaints on the map">
-      {loading ? <div className="text-gray-600">Loading…</div> : <AssetMap assets={data.assets} complaints={data.complaints} />}
+    <Card title="Public Asset Map" subtitle="Map view is temporarily unavailable">
+      <div className="text-gray-600">
+        The interactive map feature has been disabled in this build. You can still view your
+        complaints and asset details from the other sections.
+      </div>
     </Card>
   );
 };

@@ -14,12 +14,17 @@ const Header = () => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">
             {user?.role === 'admin' && 'Admin Dashboard'}
-            {user?.role === 'hod' && 'Head of Department Dashboard'}
+            {user?.role === 'department_head' && 'Department Head Dashboard'}
             {user?.role === 'technician' && 'Technician Dashboard'}
             {user?.role === 'citizen' && 'Citizen Portal'}
           </h2>
           <p className="text-sm text-gray-500 mt-1">
             Welcome back, {user?.name}
+            {user?.role === 'department_head' && user?.department && (
+              <span className="ml-2 font-medium text-blue-600">
+                • {user.department.name} Department
+              </span>
+            )}
           </p>
         </div>
         <div className="flex items-center space-x-4">

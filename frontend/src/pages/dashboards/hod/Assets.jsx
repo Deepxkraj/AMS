@@ -8,7 +8,6 @@ import AssetModal from '../../../components/AssetModal';
 const Assets = () => {
   const [assets, setAssets] = useState([]);
   const [departments, setDepartments] = useState([]);
-  const [technicians, setTechnicians] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
@@ -20,14 +19,12 @@ const Assets = () => {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [a, d, t] = await Promise.all([
+      const [a, d] = await Promise.all([
         api.get('/api/assets'),
         api.get('/api/departments'),
-        api.get('/api/users/technicians'),
       ]);
       setAssets(a.data);
       setDepartments(d.data);
-      setTechnicians(t.data);
     } catch (e) {
       toast.error('Failed to load assets');
     } finally {
@@ -35,21 +32,11 @@ const Assets = () => {
     }
   };
 
-  const assign = async (assetId, technicianId) => {
-    try {
-      await api.put(`/api/assets/${assetId}`, { assignedTechnician: technicianId || null });
-      toast.success('Assignment updated');
-      fetchAll();
-    } catch (e) {
-      toast.error(e.response?.data?.message || 'Failed to assign technician');
-    }
-  };
-
   return (
     <div className="space-y-6">
       <Card
         title="Department Assets"
-        subtitle="Manage assets and assign technicians"
+        subtitle="Manage assets"
         right={
           <button
             onClick={() => {
@@ -74,7 +61,6 @@ const Assets = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Assign Technician</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
@@ -85,20 +71,6 @@ const Assets = () => {
                     <td className="px-6 py-4 text-sm text-gray-600">{a.category}</td>
                     <td className="px-6 py-4 text-sm">
                       <StatusBadge status={a.status} />
-                    </td>
-                    <td className="px-6 py-4 text-sm">
-                      <select
-                        value={a.assignedTechnician?._id || ''}
-                        onChange={(e) => assign(a._id, e.target.value)}
-                        className="px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      >
-                        <option value="">Not assigned</option>
-                        {technicians.map((t) => (
-                          <option key={t._id} value={t._id}>
-                            {t.name}
-                          </option>
-                        ))}
-                      </select>
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <button

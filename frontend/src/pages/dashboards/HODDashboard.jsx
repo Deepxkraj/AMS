@@ -5,7 +5,6 @@ import Approvals from './hod/Approvals';
 import Assets from './hod/Assets';
 import Complaints from './hod/Complaints';
 import Technicians from './hod/Technicians';
-import MapView from './hod/MapView';
 
 const HODDashboard = () => {
   return (
@@ -16,7 +15,6 @@ const HODDashboard = () => {
         <Route path="assets" element={<Assets />} />
         <Route path="complaints" element={<Complaints />} />
         <Route path="technicians" element={<Technicians />} />
-        <Route path="map" element={<MapView />} />
       </Routes>
     </Layout>
   );

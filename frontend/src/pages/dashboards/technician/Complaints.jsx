@@ -74,6 +74,17 @@ const Complaints = () => {
                   <div className="text-sm text-gray-600 mt-1">
                     Asset: {c.asset?.name || 'N/A'} • Urgency: {c.urgency}
                   </div>
+                  {c.dueDate && (
+                    <div className="text-xs mt-1">
+                      <span className="font-semibold">Task End Date:</span>{' '}
+                      {new Date(c.dueDate).toLocaleDateString('en-IN')}
+                    </div>
+                  )}
+                  {c.dueDate && new Date(c.dueDate) < new Date() && c.status !== 'Resolved' && (
+                    <div className="text-xs text-red-600 mt-1">
+                      This task is past the end date. Please update status and submit completion proof.
+                    </div>
+                  )}
                 </div>
                 <div className="flex items-center gap-3">
                   <StatusBadge status={c.status} />

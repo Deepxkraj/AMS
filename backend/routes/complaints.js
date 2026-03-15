@@ -154,11 +154,11 @@ router.post('/', protect, authorize('citizen'), upload.single('image'), async (r
 });
 
 // @route   PUT /api/complaints/:id/assign
-// @desc    Assign complaint to technician
+// @desc    Assign complaint to technician (with optional due date)
 // @access  Private/HOD or Admin
 router.put('/:id/assign', protect, authorize('hod', 'admin'), async (req, res) => {
   try {
-    const { assignedTo } = req.body;
+    const { assignedTo, dueDate } = req.body;
     const complaint = await Complaint.findById(req.params.id);
     
     if (!complaint) {
@@ -171,6 +171,7 @@ router.put('/:id/assign', protect, authorize('hod', 'admin'), async (req, res) =
     }
 
     complaint.assignedTo = assignedTo;
+    complaint.dueDate = dueDate ? new Date(dueDate) : undefined;
     complaint.status = 'Assigned';
     complaint.updatedAt = Date.now();
 

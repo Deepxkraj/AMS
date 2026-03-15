@@ -7,6 +7,11 @@ import StatusBadge from '../../../components/ui/StatusBadge';
 const Assets = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [activeId, setActiveId] = useState(null);
+  const [note, setNote] = useState('');
+  const [photos, setPhotos] = useState([]);
+  const [cost, setCost] = useState('');
+  const [type, setType] = useState('Repair');
 
   useEffect(() => {
     fetchData();
@@ -32,8 +37,32 @@ const Assets = () => {
     }
   };
 
+  const addLog = async (id) => {
+    const fd = new FormData();
+    fd.append('description', note);
+    fd.append('type', type);
+    if (cost) {
+      fd.append('cost', cost);
+    }
+    Array.from(photos || []).forEach((p) => fd.append('photos', p));
+
+    try {
+      await api.post(`/api/assets/${id}/maintenance-log`, fd, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      toast.success('Maintenance log added');
+      setNote('');
+      setPhotos([]);
+      setCost('');
+      setActiveId(null);
+      fetchData();
+    } catch (e) {
+      toast.error(e.response?.data?.message || 'Failed to add maintenance log');
+    }
+  };
+
   return (
-    <Card title="My Assigned Assets" subtitle="Update maintenance status">
+    <Card title="My Assigned Assets" subtitle="Update maintenance status and logs">
       {loading ? (
         <div className="text-gray-600">Loading…</div>
       ) : items.length === 0 ? (
@@ -47,6 +76,7 @@ const Assets = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Update</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Log</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -70,10 +100,65 @@ const Assets = () => {
                       ))}
                     </select>
                   </td>
+                  <td className="px-6 py-4 text-sm">
+                    <button
+                      onClick={() => setActiveId((prev) => (prev === a._id ? null : a._id))}
+                      className="px-3 py-2 rounded-lg bg-gray-900 text-white hover:bg-gray-800"
+                    >
+                      Add Log
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
+          {items.map(
+            (a) =>
+              activeId === a._id && (
+                <div key={`${a._id}-log`} className="border-t border-gray-200 p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                  <textarea
+                    rows={3}
+                    value={note}
+                    onChange={(e) => setNote(e.target.value)}
+                    className="md:col-span-2 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Maintenance details for this asset"
+                  />
+                  <div className="space-y-2">
+                    <select
+                      value={type}
+                      onChange={(e) => setType(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      {['Inspection', 'Repair', 'Replacement', 'Preventive'].map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      type="number"
+                      value={cost}
+                      onChange={(e) => setCost(e.target.value)}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="Cost (optional)"
+                    />
+                    <input
+                      type="file"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => setPhotos(e.target.files)}
+                      className="w-full"
+                    />
+                    <button
+                      onClick={() => addLog(a._id)}
+                      className="w-full px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                    >
+                      Submit Log
+                    </button>
+                  </div>
+                </div>
+              ),
+          )}
         </div>
       )}
     </Card>

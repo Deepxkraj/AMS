@@ -5,7 +5,6 @@ import Approvals from './admin/Approvals';
 import Assets from './admin/Assets';
 import Complaints from './admin/Complaints';
 import Departments from './admin/Departments';
-import MapView from './admin/MapView';
 import Users from './admin/Users';
 
 const AdminDashboard = () => {
@@ -17,7 +16,6 @@ const AdminDashboard = () => {
         <Route path="assets" element={<Assets />} />
         <Route path="complaints" element={<Complaints />} />
         <Route path="departments" element={<Departments />} />
-        <Route path="map" element={<MapView />} />
         <Route path="users" element={<Users />} />
       </Routes>
     </Layout>

@@ -24,8 +24,8 @@ router.get('/', protect, authorize('admin'), async (req, res) => {
 
 // @route   GET /api/users/pending-approvals
 // @desc    Get users pending approval
-// @access  Private/Admin or HOD
-router.get('/pending-approvals', protect, authorize('admin', 'hod'), async (req, res) => {
+// @access  Private/Admin or Department Head
+router.get('/pending-approvals', protect, authorize('admin', 'department_head'), async (req, res) => {
   try {
     let query = {};
     
@@ -34,11 +34,11 @@ router.get('/pending-approvals', protect, authorize('admin', 'hod'), async (req,
       query = {
         isActive: true,
         $or: [
-          { role: 'hod', adminApproved: false },
+          { role: 'department_head', adminApproved: false },
           { role: 'technician', hodApproved: true, adminApproved: false }
         ]
       };
-    } else if (req.user.role === 'hod') {
+    } else if (req.user.role === 'department_head') {
       query = {
         role: 'technician',
         department: req.user.department,
@@ -60,9 +60,9 @@ router.get('/pending-approvals', protect, authorize('admin', 'hod'), async (req,
 });
 
 // @route   GET /api/users/technicians
-// @desc    Get technicians in department (HOD only)
-// @access  Private/HOD
-router.get('/technicians', protect, authorize('hod'), async (req, res) => {
+// @desc    Get technicians in department (Department Head only)
+// @access  Private/Department Head
+router.get('/technicians', protect, authorize('department_head'), async (req, res) => {
   try {
     const technicians = await User.find({
       role: 'technician',
@@ -82,8 +82,8 @@ router.get('/technicians', protect, authorize('hod'), async (req, res) => {
 
 // @route   PUT /api/users/:id/approve
 // @desc    Approve user
-// @access  Private/Admin or HOD
-router.put('/:id/approve', protect, authorize('admin', 'hod'), async (req, res) => {
+// @access  Private/Admin or Department Head
+router.put('/:id/approve', protect, authorize('admin', 'department_head'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     
@@ -92,9 +92,9 @@ router.put('/:id/approve', protect, authorize('admin', 'hod'), async (req, res) 
     }
 
     if (req.user.role === 'admin') {
-      if (user.role === 'hod') {
+      if (user.role === 'department_head') {
         if (!user.department) {
-          return res.status(400).json({ message: 'HOD must select a department before approval' });
+          return res.status(400).json({ message: 'Department Head must select a department before approval' });
         }
 
         const dept = await Department.findById(user.department);
@@ -110,7 +110,7 @@ router.put('/:id/approve', protect, authorize('admin', 'hod'), async (req, res) 
         await dept.save();
       }
       user.adminApproved = true;
-    } else if (req.user.role === 'hod') {
+    } else if (req.user.role === 'department_head') {
       if (user.role === 'technician' && user.department.toString() === req.user.department.toString()) {
         user.hodApproved = true;
       } else {
@@ -138,9 +138,16 @@ router.put('/:id', protect, async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    // Users can only update themselves, unless admin
+    // Users can update themselves, admin can update anyone, Department Head can update technicians in their department
     if (req.user.role !== 'admin' && req.user._id.toString() !== req.params.id) {
-      return res.status(403).json({ message: 'Not authorized' });
+      if (req.user.role === 'department_head') {
+        // Department Head can only update technicians in their department
+        if (user.role !== 'technician' || user.department.toString() !== req.user.department.toString()) {
+          return res.status(403).json({ message: 'Not authorized to update this user' });
+        }
+      } else {
+        return res.status(403).json({ message: 'Not authorized to update this user' });
+      }
     }
 
     const { name, phone, isActive } = req.body;
@@ -148,11 +155,21 @@ router.put('/:id', protect, async (req, res) => {
     if (phone) user.phone = phone;
 
     // Admin can activate/deactivate non-admin accounts
-    if (typeof isActive === 'boolean' && req.user.role === 'admin') {
-      if (user.role === 'admin' && user._id.toString() !== req.user._id.toString()) {
-        return res.status(400).json({ message: 'Cannot change active status of other admin accounts' });
+    // Department Head can activate/deactivate technicians in their department
+    if (typeof isActive === 'boolean') {
+      if (req.user.role === 'admin') {
+        if (user.role === 'admin' && user._id.toString() !== req.user._id.toString()) {
+          return res.status(400).json({ message: 'Cannot change active status of other admin accounts' });
+        }
+        user.isActive = isActive;
+      } else if (req.user.role === 'department_head') {
+        // Department Head can only activate/deactivate technicians in their department
+        if (user.role === 'technician' && user.department.toString() === req.user.department.toString()) {
+          user.isActive = isActive;
+        } else {
+          return res.status(403).json({ message: 'Not authorized to change active status of this user' });
+        }
       }
-      user.isActive = isActive;
     }
 
     await user.save();

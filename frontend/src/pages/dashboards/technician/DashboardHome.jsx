@@ -5,12 +5,16 @@ import { Building2, AlertCircle, Wrench } from 'lucide-react';
 const DashboardHome = () => {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     (async () => {
       try {
         const res = await api.get('/api/dashboard/stats');
         setStats(res.data);
+      } catch (error) {
+        console.error('Error fetching technician stats:', error);
+        setError('Failed to load dashboard data');
       } finally {
         setLoading(false);
       }
@@ -18,6 +22,17 @@ const DashboardHome = () => {
   }, []);
 
   if (loading) return <div className="text-gray-600">Loading…</div>;
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        <div className="text-red-800">
+          <h3 className="font-semibold">Error Loading Dashboard</h3>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   const cards = [
     { title: 'Assigned Assets', value: stats?.assignedAssets || 0, icon: Building2, color: 'bg-blue-600' },
