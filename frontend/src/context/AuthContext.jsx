@@ -1,5 +1,4 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { createContext, useContext, useEffect, useState } from 'react';
 import api from '../utils/api';
 
 const AuthContext = createContext();
@@ -15,7 +14,6 @@ export const useAuth = () => {
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -73,7 +71,8 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
-    navigate('/login');
+    // Use window.location for logout - it's more reliable
+    window.location.href = '/login';
   };
 
   const value = {
