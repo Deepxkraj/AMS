@@ -26,13 +26,33 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
   'https://ams-backend-86i6.onrender.com',
-  'https://ams-frontend-86i6.onrender.com',
-  'https://ams-frontend-86i6.vercel.app',
+  /^https:\/\/.*\.vercel\.app$/,  // Allow all Vercel domains
+  /^https:\/\/.*\.onrender\.com$/, // Allow all Render domains
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
+// Custom CORS origin checker
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin matches allowed patterns
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (typeof allowed === 'string') {
+        return origin === allowed;
+      } else if (allowed instanceof RegExp) {
+        return allowed.test(origin);
+      }
+      return false;
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
