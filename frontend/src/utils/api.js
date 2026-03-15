@@ -30,7 +30,8 @@ api.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Don't redirect here - let the component handle it
+      console.warn('Token expired, please login again');
     }
     return Promise.reject(error);
   }
