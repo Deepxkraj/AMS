@@ -25,8 +25,9 @@ const app = express();
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:3001',
-  'https://ams-frontend.onrender.com',
-  'https://ams-frontend.vercel.app',
+  'https://ams-backend-86i6.onrender.com',
+  'https://ams-frontend-86i6.onrender.com',
+  'https://ams-frontend-86i6.vercel.app',
   process.env.FRONTEND_URL
 ].filter(Boolean);
 
