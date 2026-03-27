@@ -37,7 +37,7 @@ const DashboardHome = () => {
   const cards = [
     { title: 'Assigned Assets', value: stats?.assignedAssets || 0, icon: Building2, color: 'bg-blue-600' },
     { title: 'Assigned Complaints', value: stats?.assignedComplaints || 0, icon: AlertCircle, color: 'bg-red-600' },
-    { title: 'In Progress', value: stats?.inProgressComplaints || 0, icon: Wrench, color: 'bg-yellow-500' },
+    { title: 'In Progress', value: stats?.inProgressComplaints || 0, icon: Wrench, color: 'bg-yellow-600' },
   ];
 
   return (

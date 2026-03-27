@@ -169,6 +169,9 @@ const assetSchema = new mongoose.Schema({
 
 // Index for geospatial queries
 assetSchema.index({ location: '2dsphere' });
+assetSchema.index({ department: 1, createdAt: -1 });
+assetSchema.index({ assignedTechnician: 1, createdAt: -1 });
+assetSchema.index({ status: 1, priority: 1 });
 
 export default mongoose.model('Asset', assetSchema);
 

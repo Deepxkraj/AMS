@@ -26,7 +26,7 @@ const complaintSchema = new mongoose.Schema({
     required: true
   },
   image: {
-    type: String // Path to uploaded file
+    type: String
   },
   location: {
     type: {
@@ -37,6 +37,11 @@ const complaintSchema = new mongoose.Schema({
     coordinates: {
       type: [Number], // [longitude, latitude]
       required: true
+    },
+    address: {
+      type: String,
+      required: true,
+      trim: true
     }
   },
   urgency: {
@@ -83,8 +88,11 @@ const complaintSchema = new mongoose.Schema({
   }
 });
 
-// Index for geospatial queries
 complaintSchema.index({ location: '2dsphere' });
+complaintSchema.index({ department: 1, createdAt: -1 });
+complaintSchema.index({ assignedTo: 1, status: 1, createdAt: -1 });
+complaintSchema.index({ citizen: 1, createdAt: -1 });
+complaintSchema.index({ status: 1, dueDate: 1 });
 
 export default mongoose.model('Complaint', complaintSchema);
 

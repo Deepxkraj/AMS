@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../../utils/api';
-import { Building2, AlertCircle, Users, CheckCircle2, MapPin } from 'lucide-react';
+import { Building2, Users, CheckCircle2, MapPin, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
 const DashboardHome = () => {
@@ -9,25 +9,13 @@ const DashboardHome = () => {
   const [error, setError] = useState(null);
   const { user } = useAuth();
 
-  // Debug logging
-  console.log('DashboardHome - User:', user);
-  console.log('DashboardHome - User Role:', user?.role);
-  console.log('DashboardHome - User Department:', user?.department);
-
   useEffect(() => {
-    console.log('DashboardHome - useEffect triggered');
-    console.log('DashboardHome - Current user:', user);
-    console.log('DashboardHome - Token in localStorage:', localStorage.getItem('token'));
-    
     (async () => {
       try {
-        console.log('DashboardHome - Starting async function');
         setError(null);
-        setStats(null); // Reset stats to trigger loading state
+        setStats(null);
         
-        // Check if user exists and has token
         if (!user) {
-          console.log('DashboardHome - No user found');
           setError('No user authenticated');
           setLoading(false);
           return;
@@ -35,36 +23,21 @@ const DashboardHome = () => {
         
         const token = localStorage.getItem('token');
         if (!token) {
-          console.log('DashboardHome - No token found');
           setError('No authentication token found');
           setLoading(false);
           return;
         }
         
-        console.log('DashboardHome - Making API call to /api/dashboard/stats');
         const res = await api.get('/api/dashboard/stats');
-        console.log('DashboardHome - API Response received:', res);
-        console.log('DashboardHome - Response status:', res.status);
-        console.log('DashboardHome - Response data:', res.data);
         
         if (res.data) {
-          console.log('DashboardHome - Setting stats:', res.data);
           setStats(res.data);
         } else {
-          console.log('DashboardHome - No data in response');
           setError('No data received from server');
         }
       } catch (err) {
-        console.error('DashboardHome - Catch block triggered');
-        console.error('DashboardHome - Error object:', err);
-        console.error('DashboardHome - Error message:', err.message);
-        console.error('DashboardHome - Error response:', err.response);
-        console.error('DashboardHome - Error status:', err.response?.status);
-        console.error('DashboardHome - Error data:', err.response?.data);
-        
         setError(err.response?.data?.message || err.message || 'Failed to load dashboard data');
       } finally {
-        console.log('DashboardHome - Finally block, setting loading to false');
         setLoading(false);
       }
     })();

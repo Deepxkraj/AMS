@@ -105,39 +105,5 @@ router.get('/stats', protect, async (req, res) => {
   }
 });
 
-// @route   GET /api/dashboard/map-data
-// @desc    Get map data (assets and complaints)
-// @access  Private
-router.get('/map-data', protect, async (req, res) => {
-  try {
-    let assetQuery = {};
-    let complaintQuery = {};
-
-    if (req.user.role === 'department_head') {
-      assetQuery.department = req.user.department;
-      complaintQuery.department = req.user.department;
-    } else if (req.user.role === 'technician') {
-      assetQuery.assignedTechnician = req.user._id;
-      complaintQuery.assignedTo = req.user._id;
-    } else if (req.user.role === 'citizen') {
-      complaintQuery.citizen = req.user._id;
-    }
-
-    const assets = await Asset.find(assetQuery)
-      .select('name category status location department assignedTechnician complaintCount')
-      .populate('department', 'name')
-      .populate('assignedTechnician', 'name');
-
-    const complaints = await Complaint.find(complaintQuery)
-      .select('title status location urgency asset')
-      .populate('asset', 'name category');
-
-    res.json({ assets, complaints });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Server error' });
-  }
-});
-
 export default router;
 

@@ -8,7 +8,7 @@ const router = express.Router();
 // @route   GET /api/approvals/pending
 // @desc    Get pending approvals
 // @access  Private/Admin or HOD
-router.get('/pending', protect, authorize('admin', 'hod'), async (req, res) => {
+router.get('/pending', protect, authorize('admin', 'department_head'), async (req, res) => {
   try {
     let query = {};
     
@@ -19,11 +19,11 @@ router.get('/pending', protect, authorize('admin', 'hod'), async (req, res) => {
       query = {
         isActive: true,
         $or: [
-          { role: 'hod', adminApproved: false },
+          { role: 'department_head', adminApproved: false },
           { role: 'technician', hodApproved: true, adminApproved: false }
         ]
       };
-    } else if (req.user.role === 'hod') {
+    } else if (req.user.role === 'department_head') {
       query = {
         role: 'technician',
         department: req.user.department,
@@ -47,7 +47,7 @@ router.get('/pending', protect, authorize('admin', 'hod'), async (req, res) => {
 // @route   PUT /api/approvals/:id/approve
 // @desc    Approve user
 // @access  Private/Admin or HOD
-router.put('/:id/approve', protect, authorize('admin', 'hod'), async (req, res) => {
+router.put('/:id/approve', protect, authorize('admin', 'department_head'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     
@@ -57,7 +57,7 @@ router.put('/:id/approve', protect, authorize('admin', 'hod'), async (req, res) 
 
     if (req.user.role === 'admin') {
       // Admin only provides admin approval (final approval step for both HOD + Technician)
-      if (user.role === 'hod') {
+      if (user.role === 'department_head') {
         if (!user.department) {
           return res.status(400).json({ message: 'HOD must select a department before approval' });
         }
@@ -76,7 +76,7 @@ router.put('/:id/approve', protect, authorize('admin', 'hod'), async (req, res) 
         await dept.save();
       }
       user.adminApproved = true;
-    } else if (req.user.role === 'hod') {
+    } else if (req.user.role === 'department_head') {
       if (user.role === 'technician' && user.department.toString() === req.user.department.toString()) {
         // HOD only provides hod approval (first-level approval for Technician)
         user.hodApproved = true;
@@ -101,7 +101,7 @@ router.put('/:id/approve', protect, authorize('admin', 'hod'), async (req, res) 
 // @route   PUT /api/approvals/:id/reject
 // @desc    Reject user
 // @access  Private/Admin or HOD
-router.put('/:id/reject', protect, authorize('admin', 'hod'), async (req, res) => {
+router.put('/:id/reject', protect, authorize('admin', 'department_head'), async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     

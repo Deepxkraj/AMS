@@ -21,7 +21,7 @@ const Assets = () => {
 
   const fetchAssets = async () => {
     try {
-      const response = await api.get('/api/assets');
+      const response = await api.get('/api/assets?includeDepartmentHOD=1');
       setAssets(response.data);
     } catch (error) {
       console.error('Error fetching assets:', error);

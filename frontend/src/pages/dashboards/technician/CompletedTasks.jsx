@@ -7,6 +7,14 @@ const CompletedTasks = () => {
   const { user } = useAuth();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const baseUrl = api.defaults.baseURL || '';
+
+  const resolveUrl = (url) => {
+    if (!url) return '';
+    if (/^https?:\/\//i.test(url)) return url;
+    if (url.startsWith('/')) return `${baseUrl}${url}`;
+    return `${baseUrl}/${url}`;
+  };
 
   useEffect(() => {
     fetchData();
@@ -15,7 +23,7 @@ const CompletedTasks = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/api/assets');
+      const res = await api.get('/api/assets?includeMaintenance=1');
       const technicianId = user?.id || user?._id;
       const logs = [];
 
@@ -92,13 +100,13 @@ const CompletedTasks = () => {
                     {log.photos.map((url, i) => (
                       <a
                         key={i}
-                        href={url}
+                        href={resolveUrl(url)}
                         target="_blank"
                         rel="noreferrer"
                         className="block border rounded overflow-hidden w-24 h-24 bg-gray-100"
                       >
                         <img
-                          src={url}
+                          src={resolveUrl(url)}
                           alt="maintenance proof"
                           className="w-full h-full object-cover"
                         />

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import api from '../../../utils/api';
-import { Building2, AlertCircle, Users, CheckCircle2, TrendingUp, Map } from 'lucide-react';
+import { Building2, Users, CheckCircle2, AlertCircle } from 'lucide-react';
 
 const DashboardHome = () => {
   const [stats, setStats] = useState(null);
@@ -91,18 +91,6 @@ const DashboardHome = () => {
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Assets by Status</h3>
           <div className="space-y-3">
             {stats?.assetsByStatus?.map((item) => (
-              <div key={item._id} className="flex items-center justify-between">
-                <span className="text-gray-600 capitalize">{item._id}</span>
-                <span className="font-semibold text-gray-900">{item.count}</span>
-              </div>
-            )) || <p className="text-gray-500">No data available</p>}
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Complaints by Status</h3>
-          <div className="space-y-3">
-            {stats?.complaintsByStatus?.map((item) => (
               <div key={item._id} className="flex items-center justify-between">
                 <span className="text-gray-600 capitalize">{item._id}</span>
                 <span className="font-semibold text-gray-900">{item.count}</span>

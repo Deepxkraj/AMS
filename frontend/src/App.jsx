@@ -8,9 +8,9 @@ import AdminDashboard from './pages/dashboards/AdminDashboard';
 import Layout from './components/Layout/Layout';
 import HODDashboardHome from './pages/dashboards/hod/DashboardHome';
 import HODAssets from './pages/dashboards/hod/Assets';
-import HODComplaints from './pages/dashboards/hod/Complaints';
 import HODTechnicians from './pages/dashboards/hod/Technicians';
 import HODApprovals from './pages/dashboards/hod/Approvals';
+import HODComplaints from './pages/dashboards/hod/Complaints';
 import HODMaintenance from './pages/dashboards/hod/Maintenance';
 import HODCompletedTasks from './pages/dashboards/hod/CompletedTasks';
 import TechnicianDashboardHome from './pages/dashboards/technician/DashboardHome';
@@ -56,7 +56,7 @@ const SimpleCitizenDashboard = () => {
       <Routes>
         <Route index element={<CitizenDashboardHome />} />
         <Route path="complaints" element={<CitizenComplaints />} />
-        <Route path="complaints/new" element={<NewComplaint />} />
+        <Route path="new-complaint" element={<NewComplaint />} />
       </Routes>
     </Layout>
   );

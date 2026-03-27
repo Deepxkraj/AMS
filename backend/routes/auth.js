@@ -157,8 +157,13 @@ router.post('/signup', upload.single('idProof'), [
 
     const user = await User.create(userData);
 
+    const message =
+      role === 'citizen'
+        ? 'Registration successful. You can login now.'
+        : 'Registration successful. Please wait for approval.';
+
     res.status(201).json({
-      message: 'Registration successful. Please wait for approval.',
+      message,
       user: {
         id: user._id,
         name: user.name,

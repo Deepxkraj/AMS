@@ -42,6 +42,8 @@ function parseLocation(body) {
 router.get('/', protect, async (req, res) => {
   try {
     let query = {};
+    const includeMaintenance = req.query.includeMaintenance === '1';
+    const includeDepartmentHOD = req.query.includeDepartmentHOD === '1';
     
     // Department Head sees only their department assets
     if (req.user.role === 'department_head') {
@@ -53,7 +55,8 @@ router.get('/', protect, async (req, res) => {
       query.assignedTechnician = req.user._id;
     }
 
-    const assets = await Asset.find(query)
+    let assetQuery = Asset.find(query)
+      .select(includeMaintenance ? undefined : '-maintenance.maintenanceHistory')
       .populate({
         path: 'department',
         select: 'name',
@@ -64,32 +67,39 @@ router.get('/', protect, async (req, res) => {
         select: 'name email',
         strictPopulate: false
       })
-      .populate({
+      .sort({ createdAt: -1 });
+
+    if (includeMaintenance) {
+      assetQuery = assetQuery.populate({
         path: 'maintenance.maintenanceHistory.technician',
         select: 'name email',
         strictPopulate: false
-      })
-      .sort({ createdAt: -1 });
+      });
+    }
 
-    // Get Department Heads for each department
-    const departments = [...new Set(assets.map(asset => asset.department?._id).filter(Boolean))];
-    const departmentHeads = await User.find({ 
-      role: 'department_head', 
+    const assets = await assetQuery.lean();
+
+    if (!includeDepartmentHOD) {
+      return res.json(assets);
+    }
+
+    const departments = [...new Set(assets.map((asset) => asset.department?._id).filter(Boolean))];
+    const departmentHeads = await User.find({
+      role: 'department_head',
       department: { $in: departments },
-      isActive: true 
-    }).select('name email department');
-    
+      isActive: true
+    }).select('name email department').lean();
+
     const hodMap = {};
-    departmentHeads.forEach(hod => {
-      hodMap[hod.department.toString()] = hod;
+    departmentHeads.forEach((hod) => {
+      hodMap[String(hod.department)] = hod;
     });
 
-    // Add Department Head info to assets
-    const assetsWithHOD = assets.map(asset => ({
-      ...asset.toObject(),
-      departmentHOD: hodMap[asset.department?._id?.toString()] || null
+    const assetsWithHOD = assets.map((asset) => ({
+      ...asset,
+      departmentHOD: hodMap[String(asset.department?._id)] || null
     }));
-    
+
     res.json(assetsWithHOD);
   } catch (error) {
     console.error(error);

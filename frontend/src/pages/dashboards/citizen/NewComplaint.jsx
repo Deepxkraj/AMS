@@ -1,184 +1,163 @@
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
 import api from '../../../utils/api';
-import Card from '../../../components/ui/Card';
-
-const categories = ['Damage', 'Maintenance', 'Safety', 'Other'];
-const urgencies = ['Low', 'Medium', 'High', 'Critical'];
+import { Upload } from 'lucide-react';
 
 const NewComplaint = () => {
-  const [assets, setAssets] = useState([]);
+  const navigate = useNavigate();
+  const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [image, setImage] = useState(null);
 
   const [form, setForm] = useState({
     title: '',
     description: '',
-    category: 'Damage',
     urgency: 'Medium',
-    asset: '',
+    department: '',
+    address: ''
   });
 
-  const [image, setImage] = useState(null);
-  const [location, setLocation] = useState(null); // { latitude, longitude }
-
   useEffect(() => {
-    fetchAssets();
-    captureLocation();
+    const loadDepartments = async () => {
+      try {
+        const deptRes = await api.get('/api/departments');
+        setDepartments(deptRes.data || []);
+      } catch {
+        setDepartments([]);
+      }
+    };
+    loadDepartments();
   }, []);
-
-  const fetchAssets = async () => {
-    try {
-      const res = await api.get('/api/assets');
-      setAssets(res.data);
-    } catch {
-      // optional
-    }
-  };
-
-  const captureLocation = () => {
-    if (!navigator.geolocation) {
-      toast.error('Geolocation not supported');
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setLocation({ latitude: pos.coords.latitude, longitude: pos.coords.longitude });
-      },
-      () => {
-        toast.error('Unable to fetch location. Please allow location access.');
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
 
   const submit = async (e) => {
     e.preventDefault();
-    if (!location) {
-      toast.error('Location is required (enable GPS / location permission).');
-      return;
-    }
     setLoading(true);
-    try {
-      const fd = new FormData();
-      fd.append('title', form.title);
-      fd.append('description', form.description);
-      fd.append('category', form.category);
-      fd.append('urgency', form.urgency);
-      if (form.asset) fd.append('asset', form.asset);
-      if (image) fd.append('image', image);
-      fd.append('location', JSON.stringify(location));
 
-      await api.post('/api/complaints', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
-      toast.success('Complaint submitted');
-      setForm({ title: '', description: '', category: 'Damage', urgency: 'Medium', asset: '' });
-      setImage(null);
-    } catch (e2) {
-      toast.error(e2.response?.data?.message || 'Failed to submit complaint');
+    try {
+      const data = new FormData();
+      data.append('title', form.title);
+      data.append('description', form.description);
+      data.append('category', 'Maintenance');
+      data.append('urgency', form.urgency);
+      data.append('department', form.department);
+      data.append('address', form.address);
+      if (image) data.append('image', image);
+
+      await api.post('/api/complaints', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+
+      navigate('/citizen/complaints');
+    } catch (err) {
+      alert(err?.response?.data?.message || 'Failed to submit complaint');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Card title="New Complaint" subtitle="Submit a new complaint with auto-captured location">
-      <form onSubmit={submit} className="space-y-4">
+    <div className="p-6 max-w-3xl">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">New Complaint</h1>
+        <p className="text-gray-600 mt-1">
+          Fill a few simple details and submit your complaint.
+        </p>
+      </div>
+
+      <form onSubmit={submit} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
             <input
               required
               value={form.title}
-              onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="e.g., Streetlight not working"
+              onChange={(e) => setForm((s) => ({ ...s, title: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Short title"
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Asset (optional)</label>
-            <select
-              value={form.asset}
-              onChange={(e) => setForm((f) => ({ ...f, asset: e.target.value }))}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              <option value="">No asset selected</option>
-              {assets.map((a) => (
-                <option key={a._id} value={a._id}>
-                  {a.name} ({a.category})
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-          <textarea
-            required
-            rows={4}
-            value={form.description}
-            onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-            className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="Describe the issue"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
-            <select
-              value={form.category}
-              onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            >
-              {categories.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <textarea
+              required
+              rows={4}
+              value={form.description}
+              onChange={(e) => setForm((s) => ({ ...s, description: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Explain the issue"
+            />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Urgency</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Urgency</label>
             <select
               value={form.urgency}
-              onChange={(e) => setForm((f) => ({ ...f, urgency: e.target.value }))}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              onChange={(e) => setForm((s) => ({ ...s, urgency: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              {urgencies.map((u) => (
-                <option key={u} value={u}>
-                  {u}
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+              <option value="Critical">Critical</option>
+            </select>
+          </div>
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Department</label>
+            <select
+              required
+              value={form.department}
+              onChange={(e) => setForm((s) => ({ ...s, department: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            >
+              <option value="">Select department</option>
+              {departments.map((dept) => (
+                <option key={dept._id} value={dept._id}>
+                  {dept.name}
                 </option>
               ))}
             </select>
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Image (optional)</label>
-            <input type="file" accept="image/*" onChange={(e) => setImage(e.target.files?.[0] || null)} />
+
+          <div className="md:col-span-2">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Address / Landmark</label>
+            <input
+              required
+              value={form.address}
+              onChange={(e) => setForm((s) => ({ ...s, address: e.target.value }))}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              placeholder="Enter address or nearby landmark"
+            />
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between bg-gray-50 border border-gray-200 rounded-lg p-3">
-          <div className="text-sm text-gray-700">
-            <span className="font-medium">Location:</span>{' '}
-            {location ? `${location.latitude.toFixed(5)}, ${location.longitude.toFixed(5)}` : 'Not captured'}
+        <div className="border-t border-gray-200 pt-5">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Photo (optional)</label>
+          <div className="flex items-center gap-3">
+            <input
+              type="file"
+              accept="image/*,.heic,.heif,.webp"
+              onChange={(e) => setImage(e.target.files?.[0] || null)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            />
+            <Upload className="w-5 h-5 text-gray-500" />
           </div>
+          <p className="text-xs text-gray-500 mt-1">Allowed: JPG/JPEG/PNG/WEBP/HEIC. Max size: 15MB.</p>
+        </div>
+
+        <div className="pt-2">
           <button
-            type="button"
-            onClick={captureLocation}
-            className="px-3 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-white"
+            disabled={loading}
+            className="w-full md:w-auto px-6 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            Re-capture Location
+            {loading ? 'Submitting...' : 'Submit Complaint'}
           </button>
         </div>
-
-        <button disabled={loading} className="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50">
-          {loading ? 'Submitting…' : 'Submit Complaint'}
-        </button>
       </form>
-    </Card>
+    </div>
   );
 };
 
 export default NewComplaint;
-
 

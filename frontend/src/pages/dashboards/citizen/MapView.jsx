@@ -1,16 +1,13 @@
-import Card from '../../../components/ui/Card';
-
 const MapView = () => {
   return (
-    <Card title="Public Asset Map" subtitle="Map view is temporarily unavailable">
-      <div className="text-gray-600">
-        The interactive map feature has been disabled in this build. You can still view your
-        complaints and asset details from the other sections.
+    <div className="p-6">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <h1 className="text-2xl font-bold text-gray-900">Map View</h1>
+        <p className="text-gray-600 mt-2">Map view is temporarily unavailable.</p>
       </div>
-    </Card>
+    </div>
   );
 };
 
 export default MapView;
-
 

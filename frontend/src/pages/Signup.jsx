@@ -21,7 +21,7 @@ const Signup = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (formData.role === 'hod' || formData.role === 'technician') {
+    if (formData.role === 'department_head' || formData.role === 'technician') {
       fetchDepartments();
     }
   }, [formData.role]);
@@ -43,7 +43,7 @@ const Signup = () => {
       return;
     }
 
-    if ((formData.role === 'hod' || formData.role === 'technician') && !idProof) {
+    if ((formData.role === 'department_head' || formData.role === 'technician') && !idProof) {
       alert('ID proof is required');
       return;
     }
@@ -62,7 +62,11 @@ const Signup = () => {
     const result = await signup(data);
 
     if (result.success) {
-      alert('Registration successful! Please wait for approval.');
+      const msg =
+        formData.role === 'citizen'
+          ? 'Registration successful! You can login now.'
+          : 'Registration successful! Please wait for approval.';
+      alert(msg);
       navigate('/login');
     } else {
       alert(result.message);
@@ -121,18 +125,18 @@ const Signup = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="citizen">Citizen</option>
-              <option value="hod">Head of Department</option>
+              <option value="department_head">Head of Department</option>
               <option value="technician">Technician</option>
             </select>
           </div>
 
-          {(formData.role === 'hod' || formData.role === 'technician') && (
+          {(formData.role === 'department_head' || formData.role === 'technician') && (
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Department
                 </label>
-                {formData.role === 'hod' && departments.filter((d) => !d.hod).length === 0 && (
+                {formData.role === 'department_head' && departments.filter((d) => !d.hod).length === 0 && (
                   <div className="mb-2 p-2 rounded bg-red-50 border border-red-200 text-xs text-red-700">
                     All departments already have a Head of Department assigned. New HOD registrations are not allowed.
                   </div>
@@ -144,7 +148,7 @@ const Signup = () => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="">Select Department</option>
-                  {(formData.role === 'hod'
+                  {(formData.role === 'department_head'
                     ? departments.filter((dept) => !dept.hod)
                     : departments
                   ).map((dept) => (
@@ -216,7 +220,7 @@ const Signup = () => {
             />
           </div>
 
-          {(formData.role === 'hod' || formData.role === 'technician') && (
+          {(formData.role === 'department_head' || formData.role === 'technician') && (
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-xs text-yellow-800">
                 Your account will be pending approval from Admin and HOD before you can login.
@@ -228,7 +232,7 @@ const Signup = () => {
             type="submit"
             disabled={
               loading ||
-              (formData.role === 'hod' && departments.filter((d) => !d.hod).length === 0)
+              (formData.role === 'department_head' && departments.filter((d) => !d.hod).length === 0)
             }
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
           >

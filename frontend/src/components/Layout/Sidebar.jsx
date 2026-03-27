@@ -4,12 +4,13 @@ import {
   LayoutDashboard,
   Users,
   Wrench,
-  FileText,
   Settings,
   LogOut,
   Building2,
+  CheckCircle2,
+  FileText,
   AlertCircle,
-  CheckCircle2
+  MapPin
 } from 'lucide-react';
 
 const Sidebar = () => {
@@ -32,21 +33,21 @@ const Sidebar = () => {
       { path: '/hod', label: 'Dashboard', icon: LayoutDashboard },
       { path: '/hod/approvals', label: 'Technician Approvals', icon: CheckCircle2 },
       { path: '/hod/assets', label: 'Assets', icon: Building2 },
+      { path: '/hod/complaints', label: 'Complaints', icon: AlertCircle },
       { path: '/hod/maintenance', label: 'Maintenance', icon: Wrench },
       { path: '/hod/completed-tasks', label: 'Completed Tasks', icon: CheckCircle2 },
-      { path: '/hod/complaints', label: 'Complaints', icon: AlertCircle },
       { path: '/hod/technicians', label: 'Technicians', icon: Users },
     ],
     technician: [
       { path: '/technician', label: 'Dashboard', icon: LayoutDashboard },
       { path: '/technician/assets', label: 'My Assets', icon: Building2 },
-      { path: '/technician/complaints', label: 'My Complaints', icon: AlertCircle },
+      { path: '/technician/complaints', label: 'Complaints', icon: AlertCircle },
       { path: '/technician/completed-tasks', label: 'Completed Tasks', icon: CheckCircle2 },
     ],
     citizen: [
       { path: '/citizen', label: 'Dashboard', icon: LayoutDashboard },
-      { path: '/citizen/complaints', label: 'My Complaints', icon: AlertCircle },
-      { path: '/citizen/complaints/new', label: 'New Complaint', icon: FileText },
+      { path: '/citizen/complaints', label: 'My Complaints', icon: FileText },
+      { path: '/citizen/new-complaint', label: 'New Complaint', icon: MapPin },
     ],
   };
 

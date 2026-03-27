@@ -28,9 +28,9 @@ export const protect = async (req, res, next) => {
       }
 
       // Check approval status
-      // - hod: requires adminApproved
+      // - department_head: requires adminApproved
       // - technician: requires adminApproved + hodApproved
-      if (user.role === 'hod') {
+      if (user.role === 'department_head') {
         if (!user.adminApproved) {
           return res.status(403).json({
             message: 'Account pending admin approval. Please wait for admin approval.'

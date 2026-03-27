@@ -11,7 +11,7 @@ const CitizenDashboard = () => {
       <Routes>
         <Route index element={<DashboardHome />} />
         <Route path="complaints" element={<Complaints />} />
-        <Route path="complaints/new" element={<NewComplaint />} />
+        <Route path="new-complaint" element={<NewComplaint />} />
         <Route path="map" element={<MapView />} />
       </Routes>
     </Layout>

@@ -1,7 +1,11 @@
 import axios from 'axios';
 
-// Dynamic API URL for development and production
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://ams-backend-86i6.onrender.com';
+// Prefer local backend in development unless explicitly overridden.
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.DEV
+    ? 'http://localhost:5000'
+    : 'https://ams-backend-86i6.onrender.com');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
